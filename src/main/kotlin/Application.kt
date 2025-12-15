@@ -3,7 +3,8 @@ package com.example
 import io.ktor.server.application.*
 import io.ktor.server.routing.IgnoreTrailingSlash
 import io.ktor.server.application.install
-import io.ktor.server.netty.EngineMain
+import io.ktor.server.engine.embeddedServer
+import io.ktor.server.netty.Netty
 import com.example.configureMonitoring
 
 import plugins.configureSerialization
@@ -27,7 +28,14 @@ import services.EmailService
 import io.github.cdimascio.dotenv.dotenv
 import services.PreguntasBackupSeeder
 
-fun main(args: Array<String>) = EngineMain.main(args)
+fun main() {
+    embeddedServer(
+        Netty,
+        port = System.getenv("PORT")?.toInt() ?: 8080,
+        host = "0.0.0.0",
+        module = Application::module
+    ).start(wait = true)
+}
 
 fun Application.module() {
     install(IgnoreTrailingSlash)
