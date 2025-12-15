@@ -21,11 +21,24 @@ object DatabaseFactory {
 fun Application.configureDatabase() {
     val s = settings()
     var last: Throwable? = null
-    repeat(30) { attempt ->
+    // Reducir reintentos para fallar rápido en deploy (5 intentos = ~5-8 segs)
+    repeat(5) { attempt ->
         try {
+            // Asegurar prefijo jdbc:postgresql://
+            var finalUrl = s.dbUrl
+            if (finalUrl.startsWith("postgres://")) {
+                finalUrl = finalUrl.replace("postgres://", "jdbc:postgresql://")
+            } else if (finalUrl.startsWith("postgresql://")) {
+                 finalUrl = finalUrl.replace("postgresql://", "jdbc:postgresql://")
+            } else if (!finalUrl.startsWith("jdbc:")) {
+                finalUrl = "jdbc:postgresql://$finalUrl" 
+            }
+
+            log.info("Intento ${attempt + 1}/5 conectando a DB: ${finalUrl.replace(Regex("://.*@"), "://***@")}")
+
             // 1) CONECTA y GUARDA
             val db = Database.connect(
-                url = s.dbUrl,
+                url = finalUrl,
                 driver = "org.postgresql.Driver",
                 user = s.dbUser,
                 password = s.dbPass
@@ -50,8 +63,8 @@ fun Application.configureDatabase() {
         } catch (e: Throwable) {
             last = e
             log.warn("DB no lista aún (intento ${attempt + 1}): ${e.message}")
-            Thread.sleep(1_000)
+            Thread.sleep(1_500)
         }
     }
-    error("No se pudo conectar a la DB: ${last?.message}")
+    error("No se pudo conectar a la DB tras 5 intentos. Último error: ${last?.message}")
 }

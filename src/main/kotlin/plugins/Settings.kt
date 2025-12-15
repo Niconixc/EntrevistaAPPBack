@@ -68,7 +68,9 @@ private fun loadSettings(envApp: ApplicationEnvironment): Settings {
         } ?: default
 
     return Settings(
-        dbUrl       = read("DB_URL", "db.url"),
+        dbUrl       = readOrNull("DB_URL", "db.url") 
+                      ?: readOrNull("DATABASE_URL", "db.url")
+                      ?: error("Falta config: DB_URL o DATABASE_URL"),
         dbUser      = read("DB_USER", "db.user"),
         dbPass      = read("DB_PASS", "db.pass"),
         jwtIssuer   = read("JWT_ISSUER", "security.jwt.issuer"),
