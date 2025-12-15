@@ -5,7 +5,7 @@ WORKDIR /home/gradle/src
 RUN gradle buildFatJar --no-daemon
 
 # Run Stage
-FROM openjdk:21-jdk-slim
+FROM eclipse-temurin:21-jre
 EXPOSE 8080
 RUN mkdir /app
 COPY --from=build /home/gradle/src/build/libs/*-all.jar /app/ktor-app.jar
