@@ -14,6 +14,7 @@ fun Application.configureCORS() {
 
         // Permitir el frontend en producción (ajustar según sea necesario)
         // allowHost("tudominio.com")
+        allowHost("frontappentrevista.vercel.app", listOf("https"))
 
         // Headers necesarios para JWT y JSON
         allowHeader(HttpHeaders.Authorization)
