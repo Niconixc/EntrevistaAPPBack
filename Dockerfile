@@ -2,7 +2,7 @@
 FROM gradle:8.5-jdk21 AS build
 COPY --chown=gradle:gradle . /home/gradle/src
 WORKDIR /home/gradle/src
-RUN gradle buildFatJar --no-daemon
+RUN gradle buildFatJar --no-daemon -x test
 
 # Run Stage
 FROM eclipse-temurin:21-jre
