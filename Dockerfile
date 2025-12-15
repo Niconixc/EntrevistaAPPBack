@@ -7,6 +7,6 @@ RUN gradle buildFatJar --no-daemon
 # Run Stage
 FROM openjdk:21-jdk-slim
 EXPOSE 8080
-mkdir /app
+RUN mkdir /app
 COPY --from=build /home/gradle/src/build/libs/*-all.jar /app/ktor-app.jar
 ENTRYPOINT ["java","-jar","/app/ktor-app.jar"]
