@@ -21,8 +21,8 @@ object DatabaseFactory {
 fun Application.configureDatabase() {
     val s = settings()
     var last: Throwable? = null
-    // Reducir reintentos para fallar rápido en deploy (5 intentos = ~5-8 segs)
-    repeat(5) { attempt ->
+    // Aumentar reintentos a 10 (con delay de 3s = 30s total) para dar tiempo a Railway
+    repeat(10) { attempt ->
         try {
             // Asegurar prefijo jdbc:postgresql://
             var finalUrl = s.dbUrl
@@ -34,7 +34,7 @@ fun Application.configureDatabase() {
                 finalUrl = "jdbc:postgresql://$finalUrl" 
             }
 
-            log.info("Intento ${attempt + 1}/5 conectando a DB: ${finalUrl.replace(Regex("://.*@"), "://***@")}")
+            log.info("Intento ${attempt + 1}/10 conectando a DB: ${finalUrl.replace(Regex("://.*@"), "://***@")}")
 
             // 1) CONECTA y GUARDA
             val db = Database.connect(
@@ -63,8 +63,8 @@ fun Application.configureDatabase() {
         } catch (e: Throwable) {
             last = e
             log.warn("DB no lista aún (intento ${attempt + 1}): ${e.message}")
-            Thread.sleep(1_500)
+            Thread.sleep(3_000)
         }
     }
-    error("No se pudo conectar a la DB tras 5 intentos. Último error: ${last?.message}")
+    error("No se pudo conectar a la DB tras 10 intentos. Último error: ${last?.message}")
 }
